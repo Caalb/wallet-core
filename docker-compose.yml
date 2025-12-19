@@ -1,0 +1,51 @@
+services:
+  hyperf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        timezone: America/Sao_Paulo
+    container_name: wallet-core-hyperf
+    ports:
+      - "9501:9501"
+    volumes:
+      - ./:/opt/www
+    depends_on:
+      - postgres
+    command: php bin/hyperf.php server:watch
+    environment:
+      APP_NAME: wallet-core
+      APP_ENV: dev
+      SCAN_CACHEABLE: "false"
+      TZ: America/Sao_Paulo
+      DB_DRIVER: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: wallet-core
+      DB_USERNAME: wallet-core
+      DB_PASSWORD: wallet-core-secret
+    networks:
+      - wallet-core-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: wallet-core-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: wallet-core
+      POSTGRES_USER: wallet-core
+      POSTGRES_PASSWORD: wallet-core-secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - wallet-core-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  wallet-core-network:
+    driver: bridge

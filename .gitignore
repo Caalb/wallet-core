@@ -1,0 +1,38 @@
+# Hyperf
+/runtime/
+/.phpunit.result.cache
+
+# Composer
+/vendor/
+composer.lock
+
+# IDE
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test
+/coverage/
+/.phpunit.cache/
+
+# Cache
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+
+# Docker volumes
+/postgres_data/
