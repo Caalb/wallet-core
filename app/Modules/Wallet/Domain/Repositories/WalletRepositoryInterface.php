@@ -14,6 +14,8 @@ interface WalletRepositoryInterface
 
     public function findByUserIdForUpdate(int $userId): ?Wallet;
 
+    public function findByUserIdsWithLock(array $userIds): array;
+
     public function save(Wallet $wallet): void;
 
     public function delete(Wallet $wallet): void;
