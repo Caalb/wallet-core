@@ -8,6 +8,7 @@ use App\Modules\Wallet\Domain\Entity\Wallet;
 use App\Modules\Wallet\Domain\Repositories\WalletRepositoryInterface;
 use App\Modules\Wallet\Domain\ValueObject\Money;
 use App\Modules\Wallet\Infra\Models\WalletModel;
+use ReflectionClass;
 
 class WalletRepository implements WalletRepositoryInterface
 {
@@ -58,7 +59,9 @@ class WalletRepository implements WalletRepositoryInterface
         $model->save();
 
         if ($wallet->getId() === 0) {
-            $wallet->setId($model->id);
+            $reflection = new ReflectionClass($wallet);
+            $property = $reflection->getProperty('id');
+            $property->setValue($wallet, $model->id);
         }
     }
 
@@ -81,6 +84,23 @@ class WalletRepository implements WalletRepositoryInterface
         }
 
         return $this->modelToEntity($model);
+    }
+
+    public function findByUserIdsWithLock(array $userIds): array
+    {
+        sort($userIds);
+
+        $models = WalletModel::query()
+            ->whereIn('user_id', $userIds)
+            ->lockForUpdate()
+            ->get();
+
+        $wallets = [];
+        foreach ($models as $model) {
+            $wallets[$model->user_id] = $this->modelToEntity($model);
+        }
+
+        return $wallets;
     }
 
     private function modelToEntity(WalletModel $model): Wallet
