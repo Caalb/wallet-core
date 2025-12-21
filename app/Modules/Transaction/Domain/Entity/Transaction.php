@@ -6,13 +6,13 @@ namespace App\Modules\Transaction\Domain\Entity;
 
 use App\Modules\Transaction\Domain\Enum\TransactionStatus;
 use App\Modules\Transaction\Domain\Exceptions\InvalidTransactionStateException;
+use App\Modules\Transaction\Domain\ValueObject\TransactionId;
 use App\Modules\Wallet\Domain\ValueObject\Money;
 use DateTimeImmutable;
-use Ramsey\Uuid\Uuid;
 
 class Transaction
 {
-    private string $id;
+    private TransactionId $id;
 
     private int $payerId;
 
@@ -33,7 +33,7 @@ class Transaction
     private DateTimeImmutable $createdAt;
 
     public function __construct(
-        string $id,
+        TransactionId $id,
         int $payerId,
         int $payeeId,
         Money $amount,
@@ -63,7 +63,7 @@ class Transaction
         ?string $idempotencyKey = null,
     ): self {
         return new self(
-            id: Uuid::uuid4()->toString(),
+            id: TransactionId::generate(),
             payerId: $payerId,
             payeeId: $payeeId,
             amount: $amount,
@@ -75,6 +75,11 @@ class Transaction
     // Getters
 
     public function getId(): string
+    {
+        return $this->id->toString();
+    }
+
+    public function getIdObject(): TransactionId
     {
         return $this->id;
     }
@@ -128,7 +133,7 @@ class Transaction
     {
         if ($this->status !== TransactionStatus::PENDING) {
             throw new InvalidTransactionStateException(
-                $this->id,
+                $this->id->toString(),
                 $this->status->value,
                 'complete',
             );
