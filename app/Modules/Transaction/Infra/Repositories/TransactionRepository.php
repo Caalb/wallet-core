@@ -10,22 +10,23 @@ use App\Modules\Transaction\Domain\Repositories\TransactionRepositoryInterface;
 use App\Modules\Transaction\Domain\ValueObject\TransactionId;
 use App\Modules\Transaction\Infra\Models\TransactionModel;
 use App\Modules\Wallet\Domain\ValueObject\Money;
+use DateTimeImmutable;
 use Hyperf\Redis\Redis;
 
 use function Hyperf\Config\config;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
-
     public function __construct(
         private Redis $redis,
-    ) {}
+    ) {
+    }
 
     public function findById(string $id): ?Transaction
     {
         $model = TransactionModel::query()->find($id);
 
-        if (! $model) {
+        if (!$model) {
             return null;
         }
 
@@ -39,6 +40,7 @@ class TransactionRepository implements TransactionRepositoryInterface
 
         if ($cached !== false) {
             $data = json_decode($cached, true);
+
             return $this->hydrateDomain($data);
         }
 
@@ -46,7 +48,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             ->where('idempotency_key', $idempotencyKey)
             ->first();
 
-        if (! $model) {
+        if (!$model) {
             return null;
         }
 
@@ -63,7 +65,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             ->orderByDesc('created_at')
             ->get();
 
-        return $models->map(fn($model) => $this->mapToDomain($model))->all();
+        return $models->map(fn ($model) => $this->mapToDomain($model))->all();
     }
 
     public function findByUserIdPaginated(int $userId, int $limit = 10, int $offset = 0): array
@@ -76,7 +78,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             ->offset($offset)
             ->get();
 
-        return $models->map(fn($model) => $this->mapToDomain($model))->all();
+        return $models->map(fn ($model) => $this->mapToDomain($model))->all();
     }
 
     public function save(Transaction $transaction): void
@@ -160,9 +162,9 @@ class TransactionRepository implements TransactionRepositoryInterface
             status: TransactionStatus::from($data['status']),
             failureReason: $data['failure_reason'],
             idempotencyKey: $data['idempotency_key'],
-            completedAt: isset($data['completed_at']) ? new \DateTimeImmutable($data['completed_at']) : null,
-            failedAt: isset($data['failed_at']) ? new \DateTimeImmutable($data['failed_at']) : null,
-            createdAt: new \DateTimeImmutable($data['created_at']),
+            completedAt: isset($data['completed_at']) ? new DateTimeImmutable($data['completed_at']) : null,
+            failedAt: isset($data['failed_at']) ? new DateTimeImmutable($data['failed_at']) : null,
+            createdAt: new DateTimeImmutable($data['created_at']),
         );
     }
 }

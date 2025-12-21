@@ -21,10 +21,12 @@ class TransactionNotificationProducer extends ProducerMessage
 
     public function getExchangeBuilder(): ExchangeBuilder
     {
-        return (new ExchangeBuilder())
-            ->setExchange($this->exchange)
-            ->setType('direct')
-            ->setDurable(true);
+        $builder = new ExchangeBuilder();
+        $builder->setExchange($this->exchange);
+        $builder->setType('direct');
+        $builder->setDurable(true);
+
+        return $builder;
     }
 
     public function getProperties(): array

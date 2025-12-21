@@ -28,7 +28,8 @@ class TransactionNotificationConsumer extends ConsumerMessage
     public function __construct(
         private ClientFactory $clientFactory,
         private LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function consumeMessage($data, AMQPMessage $amqpMessage): Result
     {

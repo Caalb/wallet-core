@@ -23,7 +23,8 @@ class FailedNotificationConsumer extends ConsumerMessage
 {
     public function __construct(
         private LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function consumeMessage($data, AMQPMessage $message): Result
     {

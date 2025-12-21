@@ -21,7 +21,8 @@ class DeviToolsAuthorizationService implements AuthorizationServiceInterface
     public function __construct(
         private ClientFactory $clientFactory,
         private LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     #[Retry(maxAttempts: 3, base: 100)]
     public function authorize(Transaction $transaction): bool

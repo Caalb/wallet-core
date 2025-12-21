@@ -24,7 +24,6 @@ class TransactionModel extends Model
 {
     use CamelCase;
 
-
     public bool $incrementing = false;
 
     public bool $timestamps = false;

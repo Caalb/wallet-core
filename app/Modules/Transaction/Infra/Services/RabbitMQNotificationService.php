@@ -15,7 +15,8 @@ class RabbitMQNotificationService implements NotificationServiceInterface
 {
     public function __construct(
         private Producer $producer,
-    ) {}
+    ) {
+    }
 
     public function notifyTransactionCompleted(Transaction $transaction): void
     {
@@ -29,9 +30,9 @@ class RabbitMQNotificationService implements NotificationServiceInterface
 
         $priority = $this->calculatePriority($transaction);
 
-        $message = (new TransactionNotificationProducer($data, $priority))
-            ->setExchange('notifications')
-            ->setRoutingKey('transaction.notification');
+        $message = new TransactionNotificationProducer($data, $priority);
+        $message->setExchange('notifications');
+        $message->setRoutingKey('transaction.notification');
 
         $this->producer->produce($message);
     }

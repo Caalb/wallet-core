@@ -29,7 +29,8 @@ class ProcessTransferUseCase
         private AuthorizationServiceInterface $authorizationService,
         private NotificationServiceInterface $notificationService,
         private LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function execute(TransferRequest $request): TransferResponse
     {
