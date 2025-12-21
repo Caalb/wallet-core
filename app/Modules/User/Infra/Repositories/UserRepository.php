@@ -9,6 +9,7 @@ use App\Modules\User\Domain\Enum\UserType;
 use App\Modules\User\Domain\Repositories\UserRepositoryInterface;
 use App\Modules\User\Domain\ValueObject\Email;
 use App\Modules\User\Infra\Models\UserModel;
+use ReflectionClass;
 
 class UserRepository implements UserRepositoryInterface
 {
@@ -54,7 +55,9 @@ class UserRepository implements UserRepositoryInterface
         $model->save();
 
         if ($user->getId() === 0) {
-            $user->setId($model->id);
+            $reflection = new ReflectionClass($user);
+            $property = $reflection->getProperty('id');
+            $property->setValue($user, $model->id);
         }
     }
 
