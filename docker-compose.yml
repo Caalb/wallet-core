@@ -12,6 +12,8 @@ services:
       - ./:/opt/www
     depends_on:
       - mysql
+      - redis
+      - rabbitmq
     command: php bin/hyperf.php server:watch
     environment:
       APP_NAME: wallet-core
@@ -24,6 +26,14 @@ services:
       DB_DATABASE: wallet-core
       DB_USERNAME: wallet-core
       DB_PASSWORD: wallet-core-secret
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_AUTH: ""
+      REDIS_DB: 0
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: wallet-core
+      RABBITMQ_PASSWORD: wallet-core-secret
     networks:
       - wallet-core-network
     restart: unless-stopped
@@ -44,8 +54,42 @@ services:
       - wallet-core-network
     command: --default-authentication-plugin=mysql_native_password
 
+  redis:
+    image: redis:7-alpine
+    container_name: wallet-core-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - wallet-core-network
+    command: redis-server --appendonly yes
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: wallet-core-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: wallet-core
+      RABBITMQ_DEFAULT_PASS: wallet-core-secret
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - wallet-core-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
     driver: local
 
 networks:

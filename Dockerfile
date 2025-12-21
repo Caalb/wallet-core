@@ -34,5 +34,6 @@ WORKDIR /opt/www
 
 COPY . /opt/www
 RUN composer update -o --ignore-platform-req=php && php bin/hyperf.php
+RUN apk add php82-xdebug
 
 EXPOSE 9501
