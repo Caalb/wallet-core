@@ -1,238 +1,87 @@
-# wallet-core - Aplicação Hyperf
-
-Aplicação desenvolvida com o framework Hyperf e PostgreSQL, totalmente containerizada com Docker.
-
-## 🚀 Tecnologias
-
-- **Hyperf**: Framework PHP baseado em Swoole para aplicações de alta performance
-- **PostgreSQL 15**: Banco de dados relacional
-- **Docker & Docker Compose**: Containerização da aplicação
-- **PHP 8.1**: Versão mínima do PHP
-- **Swoole**: Extension PHP para programação assíncrona
+# Wallet Core - Sistema de Carteira Digital
 
 ## 📋 Pré-requisitos
 
-- Docker (versão 20.10 ou superior)
-- Docker Compose (versão 2.0 ou superior)
+- Docker 24+ e Docker Compose v2
+- Git
 
-## 🔧 Instalação e Configuração
+## 🚀 Como Rodar o Projeto
 
-1. **Clone o repositório** (se ainda não estiver no diretório):
+### 1. Clone o repositório
 
 ```bash
-git clone <seu-repositorio>
-cd wallet-core
+git clone <url-do-repositorio>
+cd wallet
 ```
 
-2. **Configure as variáveis de ambiente**:
-
-O arquivo `.env` já está configurado com os valores padrão. Se desejar, você pode alterá-los:
-
-```env
-DB_HOST=postgres
-DB_PORT=5432
-DB_DATABASE=wallet-core
-DB_USERNAME=wallet-core
-DB_PASSWORD=picpay_secret
-```
-
-3. **Construa e inicie os containers**:
+### 2. Inicie os containers
 
 ```bash
 docker compose up -d --build
 ```
 
-4. **Verifique se os containers estão rodando**:
+Isso irá iniciar:
 
-```bash
-docker compose ps
-```
+- **Hyperf** (aplicação) na porta `9501`
+- **MySQL** na porta `3306`
+- **Redis** na porta `6379`
+- **RabbitMQ** na porta `5672` (Management UI: `15672`)
 
-## 🎮 Comandos Úteis
-
-### Iniciar os containers
-
-```bash
-docker compose up -d
-```
-
-### Parar os containers
-
-```bash
-docker compose down
-```
-
-### Ver logs
-
-```bash
-# Todos os logs
-docker-compose logs -f
-
-# Logs apenas do Hyperf
-docker-compose logs -f hyperf
-
-# Logs apenas do PostgreSQL
-docker-compose logs -f pos gres
-```
-
-### Executar comandos dentro do container Hyperf
-
-```bash
-docker compose exec hyperf sh
-```
-
-### Instalar novas dependências
-
-```bash
-docker compose exec hyperf composer require <package-name>
-```
-
-### Executar migrations (quando criadas)
+### 3. Execute as migrations
 
 ```bash
 docker compose exec hyperf php bin/hyperf.php migrate
 ```
 
-### Gerar um novo controller
+### 4. Verifique se está rodando
 
 ```bash
-docker compose exec hyperf php bin/hyperf.php gen:controller NomeController
+curl http://localhost:9501/health
 ```
 
-### Gerar um novo model
+### Usando Docker Compose diretamente
 
 ```bash
-docker compose exec hyperf php bin/hyperf.php gen:model NomeModel
+# Iniciar containers
+docker compose up -d
+
+# Parar containers
+docker compose down
+
+# Ver logs
+docker compose logs -f
+
+# Executar comandos no container
+docker compose exec hyperf php bin/hyperf.php <comando>
+
+# Acessar shell do container
+docker compose exec hyperf sh
 ```
 
-## 📡 Endpoints
-
-A aplicação estará disponível em:
+## 🔗 Acessos aos Serviços
 
 - **API**: http://localhost:9501
-- **PostgreSQL**: localhost:5432
+- **RabbitMQ Management**: http://localhost:15672
+  - Usuário: `wallet-core`
+  - Senha: `wallet-core-secret`
+- **MySQL**: `localhost:3306`
+  - Database: `wallet-core`
+  - Usuário: `wallet-core`
+  - Senha: `wallet-core-secret`
 
-### Testando a aplicação
+## Variáveis de Ambiente
 
-```bash
-curl http://localhost:9501
-```
+As variáveis de ambiente estão configuradas no `docker-compose.yml`. Para desenvolvimento local, você pode criar um arquivo `.env` se necessário.
 
-## 🗃️ Estrutura do Projeto
-
-```
-wallet-core/
-├── app/                    # Código da aplicação
-│   ├── Controller/        # Controllers
-│   ├── Model/            # Models
-│   ├── Middleware/       # Middlewares
-│   └── Exception/        # Exception Handlers
-├── config/                # Arquivos de configuração
-│   └── autoload/         # Configurações autoload
-├── bin/                   # Scripts executáveis
-├── runtime/              # Arquivos temporários e cache
-├── test/                 # Testes
-├── docker-compose.yml    # Configuração Docker Compose
-├── Dockerfile            # Configuração do container
-└── .env                  # Variáveis de ambiente
-```
-
-## 🔍 Banco de Dados
-
-### Conectar ao PostgreSQL
+## Limpeza
 
 ```bash
-docker-compose exec postgres psql -U wallet-core -d wallet-core
-```
+# Parar e remover containers
+docker compose down
 
-### Comandos úteis do PostgreSQL
+# Parar, remover containers e volumes (apaga dados)
+docker compose down -v
 
-```sql
--- Listar todas as tabelas
-\dt
-
--- Descrever uma tabela
-\d nome_da_tabela
-
--- Sair do psql
-\q
-```
-
-## 🧪 Testes
-
-Para executar os testes:
-
-```bash
-docker-compose exec hyperf composer test
-```
-
-## 📚 Documentação Adicional
-
-- [Documentação Oficial do Hyperf](https://hyperf.wiki/)
-- [Hyperf no GitHub](https://github.com/hyperf/hyperf)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-
-## 🛠️ Desenvolvimento
-
-### Hot Reload
-
-O Hyperf suporta hot reload em modo de desenvolvimento. Para habilitar, você pode usar o watcher:
-
-```bash
-docker-compose exec hyperf php bin/hyperf.php server:watch
-```
-
-### Debug
-
-Para habilitar o modo debug, ajuste no arquivo `.env`:
-
-```env
-APP_ENV=dev
-SCAN_CACHEABLE=false
-```
-
-## 🤝 Contribuindo
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-## 📝 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
-
-## 👥 Autores
-
-- Seu Nome - PUC
-
-## 🎯 Roadmap
-
-- [ ] Implementar autenticação JWT
-- [ ] Criar migrations do banco de dados
-- [ ] Adicionar testes unitários e de integração
-- [ ] Implementar CI/CD
-- [ ] Adicionar documentação da API com Swagger
-
-## ❓ FAQ
-
-**P: Como atualizar as dependências?**
-
-```bash
-docker-compose exec hyperf composer update
-```
-
-**P: Como limpar o cache?**
-
-```bash
-docker-compose exec hyperf rm -rf runtime/container
-```
-
-**P: Como rebuild os containers?**
-
-```bash
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+# Rebuild completo
+make rebuild
 ```
