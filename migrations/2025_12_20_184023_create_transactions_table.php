@@ -22,7 +22,7 @@ return new class extends Migration {
             $table->bigInteger('amount_cents');
             $table->enum('status', ['PENDING', 'COMPLETED', 'FAILED'])->default('PENDING');
             $table->text('failure_reason')->nullable();
-            $table->uuid('idempotency_key')->nullable()->unique();
+            $table->uuid('idempotency_key')->unique();
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('failed_at')->nullable();
             $table->timestamp('created_at')->useCurrent();
@@ -31,6 +31,7 @@ return new class extends Migration {
             $table->index(['payee_id', 'created_at']);
             $table->index(['payer_id', 'status']);
             $table->index('status');
+            $table->index(['idempotency_key', 'status'], 'idx_transactions_idempotency_status');
         });
 
         Schema::getConnection()->statement(
