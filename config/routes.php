@@ -13,17 +13,10 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
-use App\Controller\IndexController;
 use App\Modules\Auth\Infra\Controllers\AuthController;
 use App\Modules\Transaction\Infra\Controllers\TransferController;
 use Hyperf\HttpServer\Router\Router;
 use Hyperf\Validation\Middleware\ValidationMiddleware;
-
-Router::addRoute(['GET', 'POST', 'HEAD'], '/', [IndexController::class, 'index']);
-
-Router::get('/favicon.ico', function () {
-    return '';
-});
 
 Router::addGroup('/api/auth', function () {
     Router::post('/register', [AuthController::class, 'register']);
