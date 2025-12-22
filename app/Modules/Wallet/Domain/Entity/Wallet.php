@@ -10,26 +10,17 @@ use DateTimeImmutable;
 
 class Wallet
 {
-    private int $id;
-
-    private int $userId;
-
-    private Money $balance;
-
     private DateTimeImmutable $createdAt;
 
     private DateTimeImmutable $updatedAt;
 
     public function __construct(
-        int $id,
-        int $userId,
-        Money $balance,
+        private int $id,
+        private int $userId,
+        private Money $balance,
         ?DateTimeImmutable $createdAt = null,
         ?DateTimeImmutable $updatedAt = null,
     ) {
-        $this->id = $id;
-        $this->userId = $userId;
-        $this->balance = $balance;
         $this->createdAt = $createdAt ?? new DateTimeImmutable();
         $this->updatedAt = $updatedAt ?? new DateTimeImmutable();
     }

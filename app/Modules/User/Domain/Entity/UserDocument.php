@@ -10,30 +10,18 @@ use DateTimeImmutable;
 
 class UserDocument
 {
-    private int $id;
-
-    private int $userId;
-
-    private Document $document;
-
-    private DocumentType $type;
-
     private DateTimeImmutable $createdAt;
 
     private DateTimeImmutable $updatedAt;
 
     public function __construct(
-        int $id,
-        int $userId,
-        Document $document,
-        DocumentType $type,
+        private int $id,
+        private int $userId,
+        private Document $document,
+        private DocumentType $type,
         ?DateTimeImmutable $createdAt = null,
         ?DateTimeImmutable $updatedAt = null,
     ) {
-        $this->id = $id;
-        $this->userId = $userId;
-        $this->document = $document;
-        $this->type = $type;
         $this->createdAt = $createdAt ?? new DateTimeImmutable();
         $this->updatedAt = $updatedAt ?? new DateTimeImmutable();
     }

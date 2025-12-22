@@ -11,34 +11,19 @@ use DateTimeImmutable;
 
 class User
 {
-    private int $id;
-
-    private string $name;
-
-    private Email $email;
-
-    private string $password;
-
-    private UserType $type;
-
     private DateTimeImmutable $createdAt;
 
     private DateTimeImmutable $updatedAt;
 
     public function __construct(
-        int $id,
-        string $name,
-        Email $email,
-        string $password,
-        UserType $type,
+        private int $id,
+        private string $name,
+        private Email $email,
+        private string $password,
+        private UserType $type,
         ?DateTimeImmutable $createdAt = null,
         ?DateTimeImmutable $updatedAt = null,
     ) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->email = $email;
-        $this->password = $password;
-        $this->type = $type;
         $this->createdAt = $createdAt ?? new DateTimeImmutable();
         $this->updatedAt = $updatedAt ?? new DateTimeImmutable();
     }
@@ -76,16 +61,6 @@ class User
     public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updatedAt;
-    }
-
-    public function isCommon(): bool
-    {
-        return $this->type->isCommon();
-    }
-
-    public function isMerchant(): bool
-    {
-        return $this->type->isMerchant();
     }
 
     /**

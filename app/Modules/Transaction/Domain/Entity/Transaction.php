@@ -12,47 +12,20 @@ use DateTimeImmutable;
 
 class Transaction
 {
-    private TransactionId $id;
-
-    private int $payerId;
-
-    private int $payeeId;
-
-    private Money $amount;
-
-    private TransactionStatus $status;
-
-    private ?string $failureReason;
-
-    private ?string $idempotencyKey;
-
-    private ?DateTimeImmutable $completedAt;
-
-    private ?DateTimeImmutable $failedAt;
-
     private DateTimeImmutable $createdAt;
 
     public function __construct(
-        TransactionId $id,
-        int $payerId,
-        int $payeeId,
-        Money $amount,
-        TransactionStatus $status = TransactionStatus::PENDING,
-        ?string $failureReason = null,
-        ?string $idempotencyKey = null,
-        ?DateTimeImmutable $completedAt = null,
-        ?DateTimeImmutable $failedAt = null,
+        private TransactionId $id,
+        private int $payerId,
+        private int $payeeId,
+        private Money $amount,
+        private TransactionStatus $status = TransactionStatus::PENDING,
+        private ?string $failureReason = null,
+        private ?string $idempotencyKey = null,
+        private ?DateTimeImmutable $completedAt = null,
+        private ?DateTimeImmutable $failedAt = null,
         ?DateTimeImmutable $createdAt = null,
     ) {
-        $this->id = $id;
-        $this->payerId = $payerId;
-        $this->payeeId = $payeeId;
-        $this->amount = $amount;
-        $this->status = $status;
-        $this->failureReason = $failureReason;
-        $this->idempotencyKey = $idempotencyKey;
-        $this->completedAt = $completedAt;
-        $this->failedAt = $failedAt;
         $this->createdAt = $createdAt ?? new DateTimeImmutable();
     }
 
@@ -77,11 +50,6 @@ class Transaction
     public function getId(): string
     {
         return $this->id->toString();
-    }
-
-    public function getIdObject(): TransactionId
-    {
-        return $this->id;
     }
 
     public function getPayerId(): int
@@ -153,20 +121,5 @@ class Transaction
     public function isFinal(): bool
     {
         return $this->status->isFinal();
-    }
-
-    public function isCompleted(): bool
-    {
-        return $this->status === TransactionStatus::COMPLETED;
-    }
-
-    public function isFailed(): bool
-    {
-        return $this->status === TransactionStatus::FAILED;
-    }
-
-    public function isSelfTransfer(): bool
-    {
-        return $this->payerId === $this->payeeId;
     }
 }
