@@ -1,3 +1,6 @@
+includes:
+    - phpstan-baseline.neon
+
 parameters:
     level: 9
     paths:
@@ -8,10 +11,7 @@ parameters:
     bootstrapFiles:
         - vendor/autoload.php
 
-    ignoreErrors:
-        - '#Call to an undefined method Hyperf\\Database\\Model\\Builder#'
-        - '#Access to an undefined property Hyperf\\Database\\Model\\Model#'
-        - identifier: missingType.generics
+    ignoreErrors: []
 
     checkMissingIterableValueType: true
 
