@@ -138,6 +138,9 @@ return (new PhpCsFixer\Config())
         'list_syntax' => ['syntax' => 'short'],
         'multiline_comment_opening_closing' => true,
         'single_line_empty_body' => false,
+
+        'php_unit_internal_class' => false,
+        'php_unit_test_class_requires_covers' => false,
     ])
     ->setFinder($finder)
     ->setRiskyAllowed(true)
