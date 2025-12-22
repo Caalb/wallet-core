@@ -24,12 +24,12 @@ use Throwable;
 class TransactionNotificationConsumer extends ConsumerMessage
 {
     private const NOTIFICATION_URL = 'https://util.devi.tools/api/v1/notify';
+    private const QUEUE_NAME = 'transaction_notifications';
 
     public function __construct(
         private ClientFactory $clientFactory,
         private LoggerInterface $logger,
-    ) {
-    }
+    ) {}
 
     public function consumeMessage($data, AMQPMessage $amqpMessage): Result
     {
@@ -52,7 +52,6 @@ class TransactionNotificationConsumer extends ConsumerMessage
 
             $this->logger->info('Notification sent successfully', [
                 'transaction_id' => $transactionId,
-                'status_code' => $response->getStatusCode(),
                 'retry_count' => $retryCount,
             ]);
 
@@ -78,7 +77,7 @@ class TransactionNotificationConsumer extends ConsumerMessage
 
     public function getQueue(): string
     {
-        return 'transaction_notifications';
+        return self::QUEUE_NAME;
     }
 
     public function isEnable(): bool

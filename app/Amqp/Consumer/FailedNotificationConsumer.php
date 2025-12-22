@@ -21,10 +21,11 @@ use Psr\Log\LoggerInterface;
 )]
 class FailedNotificationConsumer extends ConsumerMessage
 {
+    private const QUEUE_NAME = 'transaction_notifications_dlq';
+
     public function __construct(
         private LoggerInterface $logger,
-    ) {
-    }
+    ) {}
 
     public function consumeMessage($data, AMQPMessage $message): Result
     {
@@ -38,7 +39,7 @@ class FailedNotificationConsumer extends ConsumerMessage
 
     public function getQueue(): string
     {
-        return 'transaction_notifications_dlq';
+        return self::QUEUE_NAME;
     }
 
     public function isEnable(): bool
