@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Hyperf\Contract\ApplicationInterface;
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Di\ClassLoader;
 use Hyperf\Engine\DefaultOption;
 use Swoole\Runtime;
@@ -37,7 +38,7 @@ ClassLoader::init();
 
 $container = require BASE_PATH . '/config/container.php';
 
-$config = $container->get(Hyperf\Contract\ConfigInterface::class);
+$config = $container->get(ConfigInterface::class);
 $config->set('app_env', 'testing');
 
 $config->set('databases.default.database', 'wallet-core-test');

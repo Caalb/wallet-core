@@ -21,7 +21,8 @@ class SendTransactionNotificationJob extends Job
         public int $payerId,
         public int $payeeId,
         public float $amount,
-    ) {}
+    ) {
+    }
 
     #[Retry(maxAttempts: 5, base: 1000)]
     public function handle(): void
