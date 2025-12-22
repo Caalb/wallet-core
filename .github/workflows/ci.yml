@@ -81,6 +81,9 @@ jobs:
           echo "REDIS_HOST=127.0.0.1" >> .env
           echo "REDIS_PORT=6379" >> .env
 
+      - name: Create runtime directory
+        run: mkdir -p runtime
+
       - name: Directory Permissions
         run: chmod -R 777 runtime
 
