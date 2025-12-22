@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Modules\Transaction\Domain\Exceptions;
 
-use RuntimeException;
-use Throwable;
+use App\Shared\Exceptions\AbstractWithContextException;
+use Swoole\Http\Status;
 
-class AuthorizationServiceException extends RuntimeException
+class AuthorizationServiceException extends AbstractWithContextException
 {
-    public function __construct(string $message = 'Authorization service failed', ?Throwable $previous = null)
+    public function __construct()
     {
-        parent::__construct($message, 500, $previous);
+        $message = 'authorization_service_failed';
+        $code = Status::INTERNAL_SERVER_ERROR;
+
+        parent::__construct($message, $code);
     }
 }

@@ -9,8 +9,11 @@ use Swoole\Http\Status;
 
 class AuthorizationDeniedException extends AbstractWithContextException
 {
-    public function __construct(string $message = 'Transaction not authorized')
+    public function __construct()
     {
-        parent::__construct($message, Status::UNPROCESSABLE_ENTITY);
+        $message = 'transaction_not_authorized';
+        $code = Status::UNPROCESSABLE_ENTITY;
+
+        parent::__construct($message, $code);
     }
 }
