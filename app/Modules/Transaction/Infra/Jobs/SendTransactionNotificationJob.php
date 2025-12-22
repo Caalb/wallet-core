@@ -21,8 +21,7 @@ class SendTransactionNotificationJob extends Job
         public int $payerId,
         public int $payeeId,
         public float $amount,
-    ) {
-    }
+    ) {}
 
     #[Retry(maxAttempts: 5, base: 1000)]
     public function handle(): void
@@ -45,7 +44,6 @@ class SendTransactionNotificationJob extends Job
 
             $logger->info('Notification sent', [
                 'transaction_id' => $this->transactionId,
-                'status_code' => $response->getStatusCode(),
             ]);
         } catch (Throwable $e) {
             $logger->error('Notification failed', [
