@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Transaction\Infra\Jobs;
 
+use GuzzleHttp\Exception\GuzzleException;
 use Hyperf\AsyncQueue\Job;
+use Hyperf\Context\ApplicationContext;
 use Hyperf\Guzzle\ClientFactory;
 use Hyperf\Retry\Annotation\Retry;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -24,14 +28,21 @@ class SendTransactionNotificationJob extends Job
     ) {
     }
 
+    /**
+     * @throws Throwable
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws GuzzleException
+     */
     #[Retry(maxAttempts: 5, base: 1000)]
     public function handle(): void
     {
-        $client = di(ClientFactory::class)->create([
+        $container = ApplicationContext::getContainer();
+        $client = $container->get(ClientFactory::class)->create([
             'timeout' => self::TIMEOUT,
         ]);
 
-        $logger = di(LoggerInterface::class);
+        $logger = $container->get(LoggerInterface::class);
 
         try {
             $response = $client->post(self::NOTIFICATION_URL, [

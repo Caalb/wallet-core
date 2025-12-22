@@ -10,6 +10,8 @@ use App\Modules\Transaction\Domain\Repositories\TransactionRepositoryInterface;
 use App\Modules\Transaction\Domain\ValueObject\TransactionId;
 use App\Modules\Transaction\Infra\Models\TransactionModel;
 use App\Modules\Wallet\Domain\ValueObject\Money;
+use Carbon\Carbon;
+use DateMalformedStringException;
 use DateTimeImmutable;
 use Hyperf\Redis\Redis;
 
@@ -92,8 +94,8 @@ class TransactionRepository implements TransactionRepositoryInterface
         $model->status = $transaction->getStatus()->value;
         $model->failure_reason = $transaction->getFailureReason();
         $model->idempotency_key = $transaction->getIdempotencyKey();
-        $model->completed_at = $transaction->getCompletedAt();
-        $model->failed_at = $transaction->getFailedAt();
+        $model->completed_at = $transaction->getCompletedAt() ? Carbon::instance($transaction->getCompletedAt()) : null;
+        $model->failed_at = $transaction->getFailedAt() ? Carbon::instance($transaction->getFailedAt()) : null;
 
         $model->save();
 
@@ -130,7 +132,7 @@ class TransactionRepository implements TransactionRepositoryInterface
             'idempotency_key' => $model->idempotency_key,
             'completed_at' => $model->completed_at?->format('Y-m-d H:i:s'),
             'failed_at' => $model->failed_at?->format('Y-m-d H:i:s'),
-            'created_at' => $model->created_at?->format('Y-m-d H:i:s') ?? date('Y-m-d H:i:s'),
+            'created_at' => $model->created_at->format('Y-m-d H:i:s'),
         ];
 
         $this->redis->setex($cacheKey, config('transaction.cache.ttl'), json_encode($data));
@@ -152,6 +154,9 @@ class TransactionRepository implements TransactionRepositoryInterface
         );
     }
 
+    /**
+     * @throws DateMalformedStringException
+     */
     private function hydrateDomain(array $data): Transaction
     {
         return new Transaction(

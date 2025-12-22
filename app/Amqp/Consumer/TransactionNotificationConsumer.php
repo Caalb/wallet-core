@@ -12,6 +12,8 @@ use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
+use function Hyperf\Config\config;
+
 #[Consumer(
     exchange: 'notifications',
     routingKey: 'transaction.notification',
