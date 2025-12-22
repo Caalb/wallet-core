@@ -80,7 +80,7 @@ class ProcessTransferUseCase
                 $transaction->fail('Authorization denied by external service');
                 $this->transactionRepository->save($transaction);
 
-                throw new AuthorizationDeniedException('Transaction not authorized');
+                throw new AuthorizationDeniedException();
             }
         } catch (Throwable $e) {
             $transaction->fail('Authorization service error: ' . $e->getMessage());

@@ -30,27 +30,33 @@ class DeviToolsAuthorizationService implements AuthorizationServiceInterface
         try {
             $client = $this->clientFactory->create([
                 'timeout' => config('transaction.authorization.timeout'),
+                'http_errors' => false,
             ]);
 
             $response = $client->get(self::AUTHORIZATION_URL);
+            $statusCode = $response->getStatusCode();
             $body = json_decode($response->getBody()->getContents(), true);
 
             $this->logger->info('Authorization response', [
                 'transaction_id' => $transaction->getId(),
+                'status_code' => $statusCode,
                 'response' => $body,
             ]);
 
-            return ($body['status'] ?? '') === 'success';
+            if (in_array($statusCode, [200, 403]) && isset($body['status'])) {
+                return $body['status'] === 'success';
+            }
+
+            throw new AuthorizationServiceException();
+        } catch (AuthorizationServiceException $e) {
+            throw $e;
         } catch (Throwable $e) {
             $this->logger->error('Authorization service failed', [
                 'transaction_id' => $transaction->getId(),
                 'error' => $e->getMessage(),
             ]);
 
-            throw new AuthorizationServiceException(
-                "Failed to authorize transaction: {$e->getMessage()}",
-                previous: $e,
-            );
+            throw new AuthorizationServiceException();
         }
     }
 }
