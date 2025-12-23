@@ -18,6 +18,10 @@ use App\Modules\Transaction\Infra\Controllers\TransferController;
 use Hyperf\HttpServer\Router\Router;
 use Hyperf\Validation\Middleware\ValidationMiddleware;
 
+Router::get('/health', function () {
+    return 'HEALTHY';
+});
+
 Router::addGroup('/api/auth', function () {
     Router::post('/register', [AuthController::class, 'register']);
     Router::post('/login', [AuthController::class, 'login']);
