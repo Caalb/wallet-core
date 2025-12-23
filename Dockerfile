@@ -36,4 +36,4 @@ RUN apk add php82-xdebug
 
 EXPOSE 9501
 
-CMD composer install --ignore-platform-reqs && php bin/hyperf.php server:watch
+CMD sh -c "composer install && php bin/hyperf.php server:watch"

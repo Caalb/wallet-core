@@ -14,7 +14,6 @@ services:
       - mysql
       - redis
       - rabbitmq
-    command: php bin/hyperf.php server:watch
     environment:
       APP_NAME: ${APP_NAME:-wallet-core}
       APP_ENV: ${APP_ENV:-dev}
