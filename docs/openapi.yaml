@@ -1,0 +1,435 @@
+openapi: 3.0.3
+info:
+  title: Wallet Core API
+  description: |
+    API de Carteira Digital para gerenciamento de transações financeiras.
+
+    ## Funcionalidades
+    - Autenticação de usuários
+    - Transferências entre carteiras
+    - Idempotência de transações
+    - Notificações assíncronas
+
+    ## Fluxo de Transferência
+    1. Usuário autentica na API
+    2. Solicita transferência com chave de idempotência
+    3. Sistema valida saldo e autorização
+    4. Executa transferência de forma atômica
+    5. Envia notificação via RabbitMQ
+
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@walletcore.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:9501
+    description: Servidor de Desenvolvimento
+
+tags:
+  - name: Health
+    description: Endpoints de verificação de saúde
+  - name: Authentication
+    description: Endpoints de autenticação e registro
+  - name: Transactions
+    description: Endpoints de transações financeiras
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Verifica saúde da API
+      description: Retorna o status de saúde do serviço
+      operationId: checkHealth
+      responses:
+        "200":
+          description: Serviço funcionando normalmente
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: HEALTHY
+
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Registra novo usuário
+      description: Cria um novo usuário no sistema com carteira associada
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+            examples:
+              commonUser:
+                summary: Usuário Comum (com CPF)
+                value:
+                  name: Carlos Junior
+                  email: carlos@gmail.com
+                  password: senha123
+                  cpf: "12345678909"
+                  type: COMMON
+              merchantUser:
+                summary: Lojista (com CNPJ)
+                value:
+                  name: Loja do Carlos
+                  email: carlosstore@gmail.com
+                  password: senha123
+                  cnpj: "12345678000190"
+                  type: MERCHANT
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "422":
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Autentica usuário
+      description: Realiza login e retorna token JWT
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            example:
+              email: carlos@gmail.com
+              password: senha123
+      responses:
+        "200":
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                message: invalid_credentials
+                data: null
+
+  /api/v1/transfer:
+    post:
+      tags:
+        - Transactions
+      summary: Realiza transferência
+      description: |
+        Executa uma transferência entre duas carteiras.
+
+        ## Regras de Negócio
+        - Apenas usuários comuns podem enviar transferências
+        - Lojistas só podem receber
+        - Transferências são idempotentes (use `idempotency_key`)
+        - Validação de saldo antes da transferência
+        - Autorização externa via serviço
+
+        ## Idempotência
+        Use a mesma `idempotency_key` para garantir que a transferência
+        não seja processada mais de uma vez, mesmo em caso de retry.
+
+      operationId: createTransfer
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferRequest"
+            example:
+              payer: 1
+              payee: 2
+              value: 100.00
+              idempotency_key: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        "200":
+          description: Transferência realizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransferResponse"
+              example:
+                transaction_id: "550e8400-e29b-41d4-a716-446655440000"
+                status: COMPLETED
+                amount: 100.00
+                payer_id: 1
+                payee_id: 2
+                created_at: "2024-01-15T10:30:00Z"
+                message: "Transfer completed successfully"
+        "400":
+          description: Requisição inválida
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                insufficientFunds:
+                  summary: Saldo insuficiente
+                  value:
+                    error: Insufficient funds
+                    message: Payer does not have enough balance
+                unauthorizedTransfer:
+                  summary: Transferência não autorizada
+                  value:
+                    error: Unauthorized transfer
+                    message: Merchant users cannot make transfers
+        "403":
+          description: Transferência não autorizada pelo serviço externo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Authorization denied
+                message: External authorization service denied the transfer
+        "422":
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtido através do endpoint de login
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          description: Nome completo do usuário ou loja
+          minLength: 3
+          maxLength: 255
+          example: Carlos Junior
+        email:
+          type: string
+          format: email
+          description: Email único do usuário
+          example: carlos@gmail.com
+        password:
+          type: string
+          format: password
+          description: Senha (mínimo 6 caracteres)
+          minLength: 6
+          example: senha123
+        cpf:
+          type: string
+          description: CPF com 11 dígitos (obrigatório se CNPJ não for informado)
+          pattern: '^\d{11}$'
+          example: "12345678909"
+        cnpj:
+          type: string
+          description: CNPJ com 14 dígitos (obrigatório se CPF não for informado)
+          pattern: '^\d{14}$'
+          example: "12345678000190"
+        type:
+          type: string
+          enum: [COMMON, MERCHANT]
+          description: Tipo de usuário (opcional, padrão COMMON)
+          example: COMMON
+      description: |
+        É obrigatório informar CPF OU CNPJ (não ambos).
+        O type é opcional e pode ser COMMON ou MERCHANT.
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email do usuário
+          minLength: 1
+          maxLength: 255
+          example: carlos@gmail.com
+        password:
+          type: string
+          format: password
+          description: Senha do usuário (mínimo 6 caracteres)
+          minLength: 6
+          maxLength: 255
+          example: senha123
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: ID único do usuário
+              example: 1
+            name:
+              type: string
+              description: Nome do usuário
+              example: Carlos Junior
+            email:
+              type: string
+              format: email
+              description: Email do usuário
+              example: carlos@gmail.com
+            type:
+              type: string
+              enum: [COMMON, MERCHANT]
+              description: Tipo de usuário
+              example: COMMON
+        token:
+          type: string
+          description: Token JWT para autenticação
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImNhcmxvc0BnbWFpbC5jb20iLCJ0eXBlIjoiQ09NTU9OIiwiZXhwIjoxNzM1MTUwMDAwfQ.abc123
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único do usuário
+          example: 1
+        name:
+          type: string
+          description: Nome do usuário
+          example: Carlos Junior
+        email:
+          type: string
+          format: email
+          description: Email do usuário
+          example: carlos@gmail.com
+        type:
+          type: string
+          enum: [COMMON, MERCHANT]
+          description: Tipo de usuário
+          example: COMMON
+        created_at:
+          type: string
+          format: date-time
+          description: Data de criação
+          example: "2024-01-15T10:00:00Z"
+
+    TransferRequest:
+      type: object
+      required:
+        - payer
+        - payee
+        - value
+        - idempotency_key
+      properties:
+        payer:
+          type: integer
+          description: ID do usuário que está enviando o dinheiro
+          minimum: 1
+          example: 1
+        payee:
+          type: integer
+          description: ID do usuário que está recebendo o dinheiro
+          minimum: 1
+          example: 2
+        value:
+          type: number
+          format: double
+          description: Valor da transferência em reais
+          minimum: 0.01
+          maximum: 999999.99
+          example: 100.00
+        idempotency_key:
+          type: string
+          format: uuid
+          description: Chave única para garantir idempotência da operação
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+    TransferResponse:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          description: ID único da transação (UUID v4)
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        payer_id:
+          type: integer
+          description: ID do pagador
+          example: 1
+        payee_id:
+          type: integer
+          description: ID do recebedor
+          example: 2
+        amount:
+          type: number
+          format: double
+          description: Valor transferido
+          example: 100.00
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED]
+          description: Status da transação
+          example: COMPLETED
+        message:
+          type: string
+          description: Mensagem de status
+          example: Transfer completed successfully
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Código do erro
+          example: Insufficient funds
+        message:
+          type: string
+          description: Mensagem de erro detalhada
+          example: Payer does not have enough balance
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Mensagem geral de erro
+          example: The given data was invalid
+        errors:
+          type: object
+          description: Mapa de erros de validação por campo
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            payer:
+              - The payer field is required
+            value:
+              - The value must be greater than 0
