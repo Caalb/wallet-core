@@ -41,7 +41,6 @@ $container = require BASE_PATH . '/config/container.php';
 $config = $container->get(ConfigInterface::class);
 $config->set('app_env', 'testing');
 
-
 if ($config->get('app_env') !== 'pipeline') {
     $config->set('databases.default.database', 'wallet-core-test');
 }
