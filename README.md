@@ -12,8 +12,8 @@
 ### 1. Clone o repositório
 
 ```bash
-git clone <url-do-repositorio>
-cd wallet
+git clone https://github.com/Caalb/wallet-core.git
+cd wallet-core
 ```
 
 ### 2. Configure as variáveis de ambiente
