@@ -1,5 +1,7 @@
 # Wallet Core - Sistema de Carteira Digital
 
+![CI Status](https://github.com/caalb/wallet-core/workflows/CI/badge.svg)
+
 ## 📋 Pré-requisitos
 
 - Docker 24+ e Docker Compose v2
@@ -14,7 +16,13 @@ git clone <url-do-repositorio>
 cd wallet
 ```
 
-### 2. Inicie os containers
+### 2. Configure as variáveis de ambiente
+
+```bash
+cp .env.example .env
+```
+
+### 3. Inicie os containers
 
 ```bash
 docker compose up -d --build
@@ -27,13 +35,13 @@ Isso irá iniciar:
 - **Redis** na porta `6379`
 - **RabbitMQ** na porta `5672` (Management UI: `15672`)
 
-### 3. Execute as migrations
+### 4. Execute as migrations
 
 ```bash
 docker compose exec hyperf php bin/hyperf.php migrate
 ```
 
-### 4. Verifique se está rodando
+### 5. Verifique se está rodando
 
 ```bash
 curl http://localhost:9501/health
@@ -61,6 +69,7 @@ docker compose exec hyperf sh
 ## 🔗 Acessos aos Serviços
 
 - **API**: http://localhost:9501
+- **Documentação da API (Swagger)**: http://localhost:9501/docs
 - **RabbitMQ Management**: http://localhost:15672
   - Usuário: `wallet-core`
   - Senha: `wallet-core-secret`
@@ -69,9 +78,44 @@ docker compose exec hyperf sh
   - Usuário: `wallet-core`
   - Senha: `wallet-core-secret`
 
+## 📚 Documentação da API
+
+A documentação completa da API está disponível através do Swagger UI em: http://localhost:9501/docs
+
+### Endpoints Disponíveis
+
+#### Health Check
+
+- `GET /health` - Verifica o status da API
+
+#### Autenticação
+
+- `POST /api/auth/register` - Registra novo usuário
+- `POST /api/auth/login` - Autentica usuário e retorna token JWT
+
+#### Transações
+
+- `POST /api/v1/transfer` - Realiza transferência entre carteiras (requer autenticação)
+
+### Swagger UI
+
+A documentação interativa está disponível em:
+
+**http://localhost:9502/swagger**
+
+> **Nota:** O Swagger UI permite testar todos os endpoints da API diretamente no navegador.
+
+### Arquivo OpenAPI
+
+O arquivo de especificação OpenAPI 3.0 está disponível em: `docs/openapi.yaml`
+
 ## Variáveis de Ambiente
 
-As variáveis de ambiente estão configuradas no `docker-compose.yml`. Para desenvolvimento local, você pode criar um arquivo `.env` se necessário.
+As variáveis de ambiente estão configuradas no `docker-compose.yml`. Para desenvolvimento local, copie o arquivo `.env.example` para `.env` e ajuste as configurações conforme necessário:
+
+```bash
+cp .env.example .env
+```
 
 ## Limpeza
 
