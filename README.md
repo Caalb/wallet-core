@@ -2,12 +2,12 @@
 
 ![CI Status](https://github.com/caalb/wallet-core/workflows/CI/badge.svg)
 
-## 📋 Pré-requisitos
+## Pré-requisitos
 
 - Docker 24+ e Docker Compose v2
 - Git
 
-## 🚀 Como Rodar o Projeto
+## Como Rodar o Projeto
 
 ### 1. Clone o repositório
 
@@ -66,7 +66,7 @@ docker compose exec hyperf php bin/hyperf.php <comando>
 docker compose exec hyperf sh
 ```
 
-## 🔗 Acessos aos Serviços
+## Acessos aos Serviços
 
 - **API**: http://localhost:9501
 - **Documentação da API (Swagger)**: http://localhost:9501/docs
@@ -77,10 +77,6 @@ docker compose exec hyperf sh
   - Database: `wallet-core`
   - Usuário: `wallet-core`
   - Senha: `wallet-core-secret`
-
-## 📚 Documentação da API
-
-A documentação completa da API está disponível através do Swagger UI em: http://localhost:9501/docs
 
 ### Endpoints Disponíveis
 
@@ -102,8 +98,6 @@ A documentação completa da API está disponível através do Swagger UI em: ht
 A documentação interativa está disponível em:
 
 **http://localhost:9502/swagger**
-
-> **Nota:** O Swagger UI permite testar todos os endpoints da API diretamente no navegador.
 
 ### Arquivo OpenAPI
 
