@@ -42,6 +42,20 @@ jobs:
           --health-timeout=5s
           --health-retries=3
 
+      rabbitmq:
+        image: rabbitmq:3.13-management-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --health-cmd="rabbitmq-diagnostics -q ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -80,6 +94,10 @@ jobs:
           echo "DB_PASSWORD=wallet-core-secret" >> .env
           echo "REDIS_HOST=127.0.0.1" >> .env
           echo "REDIS_PORT=6379" >> .env
+          echo "RABBITMQ_HOST=127.0.0.1" >> .env
+          echo "RABBITMQ_PORT=5672" >> .env
+          echo "RABBITMQ_USER=guest" >> .env
+          echo "RABBITMQ_PASSWORD=guest" >> .env
 
       - name: Create runtime directory
         run: mkdir -p runtime
@@ -101,7 +119,6 @@ jobs:
 
       - name: Run Feature Tests
         run: composer test -- --testsuite=Feature
-        continue-on-error: true
 
   code-quality:
     name: Code Quality
