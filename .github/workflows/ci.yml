@@ -72,7 +72,7 @@ jobs:
       - name: Setup environment
         run: |
           cp .env.example .env || echo "No .env.example file"
-          echo "APP_ENV=testing" >> .env
+          echo "APP_ENV=pipeline" >> .env
           echo "DB_HOST=127.0.0.1" >> .env
           echo "DB_PORT=3306" >> .env
           echo "DB_DATABASE=wallet-core-test" >> .env
@@ -90,7 +90,7 @@ jobs:
       - name: Run Migrations
         run: php bin/hyperf.php migrate --force
         env:
-          APP_ENV: testing
+          APP_ENV: pipeline
           SCAN_CACHEABLE: "false"
 
       - name: Run Unit Tests
