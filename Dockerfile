@@ -36,4 +36,4 @@ RUN apk add php82-xdebug
 
 EXPOSE 9501
 
-CMD sh -c "composer install && php bin/hyperf.php server:watch"
+CMD sh -c "composer install && cp docs/openapi.yaml docs/http.json && php bin/hyperf.php server:watch"
