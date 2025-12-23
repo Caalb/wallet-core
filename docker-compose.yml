@@ -8,6 +8,7 @@ services:
     container_name: wallet-core-hyperf
     ports:
       - "${HYPERF_PORT:-9501}:9501"
+      - "9502:9502"
     volumes:
       - ./:/opt/www
     depends_on:
